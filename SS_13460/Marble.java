@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.*;
 
 
-public class marble {
+public class Marble {
 
     class info {
         public int rx, ry, bx, by;
@@ -23,22 +23,22 @@ public class marble {
     public int m_x[] = {0, 0, -1, 1};
     public int m_y[] = {-1, 1, 0, 0};
     
-    public void init() throws IOException {
+    public void init() {
         
         Scanner sc = new Scanner(System.in);
 
-        System.out.println("insert x : ");
+        System.out.print("insert x, y : ");
         x_size = sc.nextInt();
-        System.out.println("insert y : ");
         y_size = sc.nextInt();
-
+        sc.nextLine();
         plate = new char[x_size][y_size];
         visit_R = new int[x_size][y_size];
         visit_B = new int[x_size][y_size];
 
         for(int i = 0 ; i < y_size ; i++) {
-            System.out.print("Insert" + (i+1) + "lines");
-            char[] temp = sc.nextLine().toCharArray();
+            System.out.print("Insert" + (i+1) + "lines : ");
+            String temp_string = sc.nextLine();
+            char temp[] = temp_string.toCharArray();
             if(temp.length != x_size) {
                 System.out.println("error 1");
                 return;
@@ -69,8 +69,9 @@ public class marble {
                     }
                 }
             }
-            sc.close();
         }
+        
+        sc.close();
     }
 
     public void init_visit() {
@@ -89,8 +90,8 @@ public class marble {
         q.add(new info(r_x,r_y,b_x,b_y));
         init_visit();
         while(!q.isEmpty()) {
+            info temp = q.poll();
             for(int i = 0; i < 4 ; i++) {
-                info temp = q.poll();
                 int rx = temp.rx , ry = temp.ry;
                 int bx = temp.bx , by = temp.by;
                 
@@ -98,11 +99,15 @@ public class marble {
                     rx = rx + m_x[i]; ry = ry + m_y[i];
                     bx = bx + m_x[i]; by = by + m_y[i];
                     
+                    if(rx < 0 || ry < 0 || bx < 0 || by < 0) break;
+                    if(rx >= x_size || ry >= y_size || bx >= x_size || by >= y_size) break;
+                    if(visit_R[rx][ry] != -1) break;
+
                     // 두 구슬 모두 다음 칸으로 이동할 수 있는 경우
                     if(plate[rx][ry] == '.' && plate[bx][by] == '.') {
                         plate[rx][ry] = 'R'; plate[bx][by] = 'B';
                         plate[rx - m_x[i]][ry - m_y[i]] = 'R'; plate[bx - m_x[i]][by - m_y[i]] = 'B';
-                        visit_R[][]
+                        visit_R[rx][ry] = visit_R[temp.rx][temp.ry] + 1; 
                     }
                     // 파란색 구슬이 O으로 들어간 경우
                     else if(plate[bx][by] == 'O')
@@ -118,10 +123,13 @@ public class marble {
                             while(true) {
                                 bx = bx + m_x[i]; by = by + m_y[i];
                                 if(plate[bx][by] == '#') {
+                                    System.out.println("bx : " + bx + " by : " + by);
                                     q.add(new info(rx - m_x[i], ry - m_y[i], bx - m_x[i], by - m_y[i]));
                                     break;
                                 }
                                 else if(plate[bx][by] == 'O') break;
+                                else 
+                                    plate[bx - m_x[i]][by - m_y[i]] = 'B';
                             }
                         }
                         //파란색 구슬이 벽에 도달했을 경우
@@ -134,6 +142,10 @@ public class marble {
                                 }
                                 else if(plate[bx][by] == 'O')
                                     return (visit_R[temp.rx][temp.ry] + 1);
+                                else {
+                                    plate[rx - m_x[i]][ry - m_y[i]] = 'R';
+                                    visit_R[rx][ry] = visit_R[temp.rx][temp.ry] + 1;
+                                }
                             }
                         }
                     }
@@ -161,6 +173,13 @@ public class marble {
         }
         //구슬을 뺄 방법을 찾지 못한 경우
         return -1;
+    }
+
+    public static void main(String args[])  throws IOException {
+        Marble mMarble = new Marble();
+        mMarble.init();
+        System.out.println("result : " + mMarble.FindPrime());
+        return;
     }
 }
 
